@@ -1,0 +1,30 @@
+﻿@model MegaProject.ViewModels.CreateEmployeeViewModel
+@{
+ViewData["Title"] = "Create Employee";
+}
+
+<div class="container mt-5">
+    <h2>Create Employee</h2>
+    <!-- TODO: check display errors -->
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div class="mb-3">
+            <label class="form-label">First Name</label>
+            <input asp-for="FirstName" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Last Name</label>
+            <input asp-for="LastName" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Middle Name</label>
+            <input asp-for="MiddleName" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input asp-for="Mail" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary">Create</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>

@@ -1,0 +1,94 @@
+﻿@model MegaProject.ViewModels.ProjectCreateViewModel
+@{
+ViewData["Title"] = "Create New Project";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4">Create New Project — 5-Step Wizard</h2>
+    <!-- TODO: check display errors -->
+
+    <!-- Progress bar -->
+    <div class="progress mb-4" style="height: 30px;">
+        <div id="progress-bar" class="progress-bar progress-bar-striped" role="progressbar" style="width: 20%;">Step 1 of 5</div>
+    </div>
+
+    <form id="wizard-form" asp-action="Create" asp-controller="Project" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+
+        <!-- STEP 1 -->
+        <div id="step-1" class="wizard-step">
+            <h4>Step 1: Basic Information</h4>
+            <div class="mb-3">
+                <label class="form-label">Project Name</label>
+                <input asp-for="Name" class="form-control" />
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="form-label">Start Date</label>
+                    <input asp-for="Start" type="date" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">End Date</label>
+                    <input asp-for="End" type="date" class="form-control" />
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Priority (1-10)</label>
+                <input asp-for="Priority" type="number" min="1" max="10" class="form-control" />
+            </div>
+            <button type="button" class="btn btn-primary next-step" data-next="2">Next →</button>
+        </div>
+
+        <!-- STEP 2 -->
+        <div id="step-2" class="wizard-step" style="display:none;">
+            <h4>Step 2: Companies</h4>
+            <div class="mb-3">
+                <label class="form-label">Customer Company</label>
+                <input asp-for="ClientName" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Executor Company</label>
+                <input asp-for="ExecutorName" class="form-control" />
+            </div>
+            <button type="button" class="btn btn-secondary prev-step" data-prev="1">← Back</button>
+            <button type="button" class="btn btn-primary next-step" data-next="3">Next →</button>
+        </div>
+
+        <!-- STEP 3 -->
+        <div id="step-3" class="wizard-step" style="display:none;">
+            <h4>Step 3: Project Manager</h4>
+            <input type="text" id="manager-search" class="form-control mb-2" placeholder="Search by name or email..." />
+            <select asp-for="ManagerId" id="manager-select" class="form-select" size="8"></select>
+            <button type="button" class="btn btn-secondary prev-step" data-prev="2">← Back</button>
+            <button type="button" class="btn btn-primary next-step" data-next="4">Next →</button>
+        </div>
+
+        <!-- STEP 4 -->
+        <div id="step-4" class="wizard-step" style="display:none;">
+            <h4>Step 4: Project Team Members</h4>
+            <input type="text" id="employees-search" class="form-control mb-2" placeholder="Search by name or email..." />
+            <select id="employees-select" class="form-select" size="8" multiple></select>
+            <small class="text-muted">Hold Ctrl (or Cmd) to select multiple employees</small>
+            <button type="button" class="btn btn-secondary prev-step" data-prev="3">← Back</button>
+            <button type="button" class="btn btn-primary next-step" data-next="5">Next →</button>
+        </div>
+
+        <!-- STEP 5 -->
+        <div id="step-5" class="wizard-step" style="display:none;">
+            <h4>Step 5: Project Documents (drag & drop)</h4>
+            <div id="drop-zone" class="border border-2 border-dashed p-5 text-center mb-3"
+                 style="min-height: 200px; background: #f8f9fa;">
+                Drop files here or <strong>click to select</strong>
+                <input type="file" id="file-input" multiple style="display: none;" />
+            </div>
+            <div id="file-list" class="list-group"></div>
+
+            <button type="button" class="btn btn-secondary prev-step" data-prev="4">← Back</button>
+            <button type="submit" class="btn btn-success">Create Project</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+<script src="~/js/wizard.js"></script>
+}
