@@ -105,12 +105,23 @@ public class EmployeeController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var employee = await _context.Employees.FindAsync(id);
-        if (employee != null)
+        var employee = await _context.Employees
+            .Include(e => e.ManagedProjects)
+            .FirstOrDefaultAsync(e => e.Id == id);
+
+        if (employee == null) return NotFound();
+
+        // Block deletion if the employee is the manager of at least one project.
+        if (employee.ManagedProjects.Count != 0)
         {
-            _context.Employees.Remove(employee);
-            await _context.SaveChangesAsync();
+            ModelState.AddModelError(string.Empty, "Cannot delete employee who is a manager of one or more projects.");
+            var employees = await _context.Employees.ToListAsync();
+            return View("Index", employees);
         }
+
+        _context.Employees.Remove(employee);
+        await _context.SaveChangesAsync();
+
         return RedirectToAction(nameof(Index));
     }
 }
