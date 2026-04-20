@@ -17,36 +17,64 @@ public class ProjectService : IProjectService
     }
 
     public async Task<IEnumerable<Project>> GetAllProjectsAsync(
-        string? search = null, 
-        DateTime? startFrom = null, 
-        DateTime? startTo = null,
-        int? minPriority = null, 
-        int? maxPriority = null)
+    string? search = null,
+    DateTime? startFrom = null,
+    DateTime? startTo = null,
+    int? minPriority = null,
+    int? maxPriority = null,
+    string? sortColumn = "Priority",
+    string? sortDirection = "desc")
+{
+    var query = _context.Projects
+        .Include(p => p.Manager)
+        .Include(p => p.Employees)
+        .AsQueryable();
+
+    if (!string.IsNullOrEmpty(search))
     {
-        var query = _context.Projects
-            .Include(p => p.Manager)
-            .Include(p => p.Employees)
-            .AsQueryable();
-
-        if (!string.IsNullOrEmpty(search))
-            query = query.Where(p => p.Name.Contains(search) || 
-                                   p.ClientName.Contains(search) || 
-                                   p.ExecutorName.Contains(search));
-
-        if (startFrom.HasValue)
-            query = query.Where(p => p.Start >= startFrom.Value);
-
-        if (startTo.HasValue)
-            query = query.Where(p => p.Start <= startTo.Value);
-
-        if (minPriority.HasValue)
-            query = query.Where(p => p.Priority >= minPriority.Value);
-
-        if (maxPriority.HasValue)
-            query = query.Where(p => p.Priority <= maxPriority.Value);
-
-        return await query.OrderByDescending(p => p.Priority).ToListAsync();
+        var searchLower = search.ToLower();
+        query = query.Where(p =>
+            p.Name.ToLower().Contains(searchLower) ||
+            p.ClientName.ToLower().Contains(searchLower) ||
+            p.ExecutorName.ToLower().Contains(searchLower));
     }
+
+    if (startFrom.HasValue)
+        query = query.Where(p => p.Start >= startFrom.Value);
+
+    if (startTo.HasValue)
+        query = query.Where(p => p.Start <= startTo.Value);
+
+    if (minPriority.HasValue)
+        query = query.Where(p => p.Priority >= minPriority.Value);
+
+    if (maxPriority.HasValue)
+        query = query.Where(p => p.Priority <= maxPriority.Value);
+
+    query = sortColumn?.ToLower() switch
+    {
+        "name" => sortDirection == "asc" 
+            ? query.OrderBy(p => p.Name) 
+            : query.OrderByDescending(p => p.Name),
+        "client" => sortDirection == "asc" 
+            ? query.OrderBy(p => p.ClientName) 
+            : query.OrderByDescending(p => p.ClientName),
+        "executor" => sortDirection == "asc" 
+            ? query.OrderBy(p => p.ExecutorName) 
+            : query.OrderByDescending(p => p.ExecutorName),
+        "start" => sortDirection == "asc" 
+            ? query.OrderBy(p => p.Start) 
+            : query.OrderByDescending(p => p.Start),
+        "end" => sortDirection == "asc" 
+            ? query.OrderBy(p => p.End) 
+            : query.OrderByDescending(p => p.End),
+        "priority" or _ => sortDirection == "asc" 
+            ? query.OrderBy(p => p.Priority) 
+            : query.OrderByDescending(p => p.Priority)
+    };
+
+    return await query.ToListAsync();
+}
 
     public async Task<Project?> GetProjectByIdAsync(Guid id)
     {

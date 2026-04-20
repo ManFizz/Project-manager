@@ -1,53 +1,133 @@
-﻿@model IEnumerable<MegaProject.Models.Project>
+﻿@model MegaProject.ViewModels.ProjectListViewModel
+@using MegaProject.Extensions
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @{
-ViewData["Title"] = "Projects";
+    ViewData["Title"] = "Projects";
 }
 
 <div class="container mt-4">
     <h2>Projects</h2>
     <a asp-action="Create" class="btn btn-success mb-3">+ Add New Project</a>
+    <br/>
+    <br/>
+    
+    <form asp-action="Index" method="get" class="row g-3 mb-4 border p-3 bg-light rounded">
+
+        <input type="hidden" name="SortColumn" value="@Model.SortColumn" />
+        <input type="hidden" name="SortDirection" value="@Model.SortDirection" />
+
+        <div class="col-md-3">
+            <label class="form-label">Search</label>
+            <input name="Search"
+                   value="@Model.Search"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Start From</label>
+            <input type="date"
+                   name="StartFrom"
+                   value="@Model.StartFrom?.ToString("yyyy-MM-dd")"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Start To</label>
+            <input type="date"
+                   name="StartTo"
+                   value="@Model.StartTo?.ToString("yyyy-MM-dd")"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Priority From</label>
+            <input type="number"
+                   name="MinPriority"
+                   value="@Model.MinPriority"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Priority To</label>
+            <input type="number"
+                   name="MaxPriority"
+                   value="@Model.MaxPriority"
+                   class="form-control" />
+        </div>
+        
+        <div class="col-md-12 d-flex gap-2 mt-2">
+            <button type="submit" class="btn btn-primary">
+                Apply
+            </button>
+
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                Reset
+            </a>
+        </div>
+
+    </form>
 
     <table class="table table-striped">
         <thead>
         <tr>
-            <th>Name</th>
-            <th>Client name</th>
-            <th>Executor name</th>
+            <th>@Html.SortLink("Name", "Name", Model.SortColumn, Model.SortDirection, null)</th>
+            <th>@Html.SortLink("Client", "Client", Model.SortColumn, Model.SortDirection, null)</th>
+            <th>@Html.SortLink("Executor", "Executor", Model.SortColumn, Model.SortDirection, null)</th>
             <th>Manager</th>
             <th>Members</th>
-            <th>Date of start</th>
-            <th>Date of end</th>
-            <th>Priority</th>
+            <th>@Html.SortLink("Start", "Start", Model.SortColumn, Model.SortDirection, null)</th>
+            <th>@Html.SortLink("End", "End", Model.SortColumn, Model.SortDirection, null)</th>
+            <th>@Html.SortLink("Priority", "Priority", Model.SortColumn, Model.SortDirection, null)</th>
             <th>Documents</th>
             <th>Actions</th>
         </tr>
         </thead>
         <tbody>
-        @foreach (var project in Model)
-        {
-        <tr>
-            <td>@project.Name</td>
-            <td>@project.ClientName</td>
-            <td>@project.ExecutorName</td>
-            <td>@project.Manager!.FirstName @project.Manager.MiddleName @project.Manager.LastName</td>
-            <td>@project.Employees.Count</td>
-            <td>@project.Start.ToShortDateString()</td>
-            <td>@project.End.ToShortDateString()</td>
-            <td>@project.Priority</td>
-            <td>@project.DocumentPaths.Count</td>
-            <td style="width: 201px">
-                <a asp-action="Details" asp-route-id="@project.Id" class="btn btn-sm btn-primary">Members</a>
-                <a asp-action="Edit" asp-route-id="@project.Id" class="btn btn-sm btn-primary">Edit</a>
-                <form asp-action="Delete" asp-route-id="@project.Id" method="post" style="display:inline;">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-sm btn-danger"
-                            onclick="return confirm('Are you sure you want to delete this project?')">
-                        Delete
-                    </button>
-                </form>
-            </td>
-        </tr>
-        }
+            @foreach (var project in Model.Projects)
+            {
+            <tr>
+                <td>@project.Name</td>
+                <td>@project.ClientName</td>
+                <td>@project.ExecutorName</td>
+                <td>
+                    @(project.Manager != null
+                    ? $"{project.Manager.FirstName} {project.Manager.LastName}"
+                    : "")
+                </td>
+                <td>@project.Employees.Count</td>
+                <td>@project.Start.ToShortDateString()</td>
+                <td>@project.End.ToShortDateString()</td>
+                <td>@project.Priority</td>
+                <td>@(project.DocumentPaths?.Count ?? 0)</td>
+
+                <td>
+                    <a asp-action="Details"
+                       asp-route-id="@project.Id"
+                       class="btn btn-sm btn-info">
+                        Members
+                    </a>
+
+                    <a asp-action="Edit"
+                       asp-route-id="@project.Id"
+                       class="btn btn-sm btn-primary">
+                        Edit
+                    </a>
+
+                    <form asp-action="Delete"
+                          asp-route-id="@project.Id"
+                          method="post"
+                          style="display:inline;">
+                        @Html.AntiForgeryToken()
+
+                        <button type="submit"
+                                class="btn btn-sm btn-danger"
+                                onclick="return confirm('Delete this project?')">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            }
         </tbody>
     </table>
 </div>

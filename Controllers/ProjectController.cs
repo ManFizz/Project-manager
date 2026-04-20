@@ -21,15 +21,65 @@ public class ProjectController : Controller
     }
 
     // GET: /Project — list of all projects with filtering and sorting
-    public async Task<IActionResult> Index(
-        string? search,
-        DateTime? startFrom,
-        DateTime? startTo,
-        int? minPriority,
-        int? maxPriority)
+    [HttpGet]
+    public async Task<IActionResult> Index(ProjectListViewModel model)
     {
-        var projects = await _projectService.GetAllProjectsAsync(search, startFrom, startTo, minPriority, maxPriority);
-        return View(projects);
+        var query = await _projectService.GetAllProjectsAsync();
+
+        // FILTERS
+        if (!string.IsNullOrWhiteSpace(model.Search))
+        {
+            query = query.Where(p =>
+                p.Name.Contains(model.Search) ||
+                p.ClientName.Contains(model.Search) ||
+                p.ExecutorName.Contains(model.Search));
+        }
+
+        if (model.StartFrom.HasValue)
+            query = query.Where(p => p.Start >= model.StartFrom);
+
+        if (model.StartTo.HasValue)
+            query = query.Where(p => p.Start <= model.StartTo);
+
+        if (model.MinPriority.HasValue)
+            query = query.Where(p => p.Priority >= model.MinPriority);
+
+        if (model.MaxPriority.HasValue)
+            query = query.Where(p => p.Priority <= model.MaxPriority);
+
+        // SORTING
+        query = model.SortColumn switch
+        {
+            "Name" => model.SortDirection == "asc"
+                ? query.OrderBy(x => x.Name)
+                : query.OrderByDescending(x => x.Name),
+
+            "Client" => model.SortDirection == "asc"
+                ? query.OrderBy(x => x.ClientName)
+                : query.OrderByDescending(x => x.ClientName),
+
+            "Executor" => model.SortDirection == "asc"
+                ? query.OrderBy(x => x.ExecutorName)
+                : query.OrderByDescending(x => x.ExecutorName),
+
+            "Start" => model.SortDirection == "asc"
+                ? query.OrderBy(x => x.Start)
+                : query.OrderByDescending(x => x.Start),
+
+            "End" => model.SortDirection == "asc"
+                ? query.OrderBy(x => x.End)
+                : query.OrderByDescending(x => x.End),
+
+            "Priority" => model.SortDirection == "asc"
+                ? query.OrderBy(x => x.Priority)
+                : query.OrderByDescending(x => x.Priority),
+
+            _ => query.OrderBy(x => x.Name)
+        };
+
+        model.Projects = query.ToList();
+
+        return View(model);
     }
 
     // GET: /Project/Create

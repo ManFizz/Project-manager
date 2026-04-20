@@ -9,7 +9,8 @@ public interface IProjectService
 {
     Task<IEnumerable<Project>> GetAllProjectsAsync(string? search = null, 
         DateTime? startFrom = null, DateTime? startTo = null, 
-        int? minPriority = null, int? maxPriority = null);
+        int? minPriority = null, int? maxPriority = null,
+        string? sortColumn = "Priority", string? sortDirection = "desc");
 
     Task<Project?> GetProjectByIdAsync(Guid id);
     Task CreateProjectAsync(Project project);
