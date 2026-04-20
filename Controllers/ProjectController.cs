@@ -12,10 +12,12 @@ namespace MegaProject.Controllers;
 public class ProjectController : Controller
 {
     private readonly IProjectService _projectService;
+    private readonly IFileService _fileService;
 
-    public ProjectController(IProjectService projectService)
+    public ProjectController(IProjectService projectService, IFileService fileService)
     {
         _projectService = projectService;
+        _fileService = fileService;
     }
 
     // GET: /Project — list of all projects with filtering and sorting
@@ -66,6 +68,9 @@ public class ProjectController : Controller
             Priority = model.Priority,
             DocumentPaths = model.DocumentPaths
         };
+        
+        var paths = await _fileService.SaveFilesAsync(model.Files);
+        project.DocumentPaths.AddRange(paths);
 
         await _projectService.CreateProjectAsync(project);
 
@@ -91,7 +96,7 @@ public class ProjectController : Controller
     // POST: /Project/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(Guid id, Project project)
+    public async Task<IActionResult> Edit(Guid id, Project project, List<IFormFile> files)
     {
         if (id != project.Id) return NotFound();
 
@@ -114,9 +119,47 @@ public class ProjectController : Controller
         existingProject.End = project.End;
         existingProject.Priority = project.Priority;
         // ManagerId & list Employees dont change
+        
+        try
+        {
+            if (files?.Count > 0)
+            {
+                var paths = await _fileService.SaveFilesAsync(files);
+                existingProject.DocumentPaths.AddRange(paths);
+            }
 
-        await _projectService.UpdateProjectAsync(existingProject);
-        return RedirectToAction(nameof(Index));
+            await _projectService.UpdateProjectAsync(existingProject);
+            if (!ModelState.IsValid)
+                return View(existingProject);
+            return RedirectToAction(nameof(Index));
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError("DocumentPaths", "File upload failed");
+            return View(project);
+        }
+    }
+    
+    // POST: /Project/Delete/{projectId}:{filePath}
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteFile(Guid projectId, string filePath)
+    {
+        var project = await _projectService.GetProjectByIdAsync(projectId);
+        if (project == null) return RedirectToAction("Index");
+
+        if (!project.DocumentPaths.Contains(filePath))
+            return RedirectToAction("Edit", new { id = projectId });
+        
+        project.DocumentPaths.Remove(filePath);
+        await _projectService.UpdateProjectAsync(project);
+
+        var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", filePath.TrimStart('/'));
+
+        if (System.IO.File.Exists(fullPath))
+            System.IO.File.Delete(fullPath);
+
+        return RedirectToAction("Edit", new { id = projectId });
     }
 
     // POST: /Project/Delete/{id}
@@ -124,7 +167,8 @@ public class ProjectController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid id)
     {
-        await _projectService.DeleteProjectAsync(id);
+        await _projectService.DeleteProjectAsync(id); //TODO: move project to archive
+        // TODO: transfer uploaded file to archive
         return RedirectToAction(nameof(Index));
     }
 

@@ -5,7 +5,7 @@ ViewData["Title"] = "Edit Project";
 
 <div class="container mt-5">
     <h2>Edit Project "@Model.Name"</h2>
-    <form asp-action="Edit" method="post">
+    <form asp-action="Edit" method="post" enctype="multipart/form-data">
         <div asp-validation-summary="All" class="text-danger mb-3"></div>
         @Html.AntiForgeryToken()
         <input type="hidden" asp-for="Id"/>
@@ -40,8 +40,49 @@ ViewData["Title"] = "Edit Project";
             <input asp-for="Priority" type="number" class="form-control"/>
             <span asp-validation-for="Priority" class="text-danger"></span>
         </div>
-
+        
         <button type="submit" class="btn btn-primary">Save Changes</button>
         <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        
+        <h4 class="mt-4">Project Documents</h4>
+
+        <h5>Add New Files</h5>
+        <div id="drop-zone" class="border border-2 border-dashed p-4 text-center mb-3">
+            Drop files here or <strong>click</strong>
+            <input type="file" id="file-input" name="files" multiple style="display:none;" />
+            <span asp-validation-for="DocumentPaths" class="text-danger"></span>
+        </div>
+        <div id="upload-errors"></div>
+        <div id="file-list" class="list-group mb-3"></div>
     </form>
+    <div class="list-group mb-3">
+        @foreach (var file in Model.DocumentPaths)
+        {
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+            <a href="@file" target="_blank">
+                @System.IO.Path.GetFileName(file)
+            </a>
+
+            <form asp-action="DeleteFile" method="post" style="display:inline;" >
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="projectId" value="@Model.Id" />
+                <input type="hidden" name="filePath" value="@file" />
+                <button type="submit" class="btn btn-sm btn-danger">
+                    Delete
+                </button>
+            </form>
+        </div>
+        }
+    </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/uploader/uploader.js"></script>
+    <script src="~/js/uploader/uploader-ui.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initUploader();
+        });
+    </script>
+}

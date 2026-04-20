@@ -2,7 +2,11 @@ using MegaProject.Data;
 using MegaProject.Services;
 using Microsoft.EntityFrameworkCore;
 
+
 var builder = WebApplication.CreateBuilder(args);
+
+Directory.CreateDirectory(@"wwwroot/uploads");
+builder.Services.AddScoped<IFileService, FileService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

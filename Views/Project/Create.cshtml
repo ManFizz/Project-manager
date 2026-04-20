@@ -5,7 +5,6 @@ ViewData["Title"] = "Create New Project";
 
 <div class="container mt-5">
     <h2 class="mb-4">Create New Project</h2>
-    <!-- TODO: check display errors -->
 
     <!-- Progress bar -->
     <div class="progress mb-4" style="height: 30px;">
@@ -87,8 +86,12 @@ ViewData["Title"] = "Create New Project";
             <div id="drop-zone" class="border border-2 border-dashed p-5 text-center mb-3"
                  style="min-height: 200px; background: #f8f9fa;">
                 Drop files here or <strong>click to select</strong>
-                <input type="file" id="file-input" multiple style="display: none;" />
+                <input type="file" id="file-input" name="Files" multiple style="display:none;" />
             </div>
+            <div class="progress mt-3" style="height: 20px;">
+                <div id="upload-progress" class="progress-bar" style="width: 0%"></div>
+            </div>
+            <div id="upload-errors"></div>
             <div id="file-list" class="list-group"></div>
 
             <button type="button" class="btn btn-secondary prev-step" data-prev="4">← Back</button>
@@ -98,5 +101,13 @@ ViewData["Title"] = "Create New Project";
 </div>
 
 @section Scripts {
-<script src="~/js/wizard.js"></script>
+<script src="~/js/wizard/validation.js"></script>
+<script src="~/js/wizard/wizard.js"></script>
+
+<script src="~/js/employees/search.js"></script>
+
+<script src="~/js/uploader/uploader.js"></script>
+<script src="~/js/uploader/uploader-ui.js"></script>
+
+<script src="~/js/project-create.js"></script>
 }
