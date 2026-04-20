@@ -20,4 +20,6 @@ public interface IProjectService
     Task<IEnumerable<Employee>> SearchEmployeesAsync(string term);
     Task AddEmployeesToProjectAsync(Guid projectId, List<Guid> employeeIds);
     Task SetManagerAsync(Guid projectId, Guid managerId);
+    
+    Task RemoveEmployeeFromProjectAsync(Guid projectId, Guid employeeId);
 }

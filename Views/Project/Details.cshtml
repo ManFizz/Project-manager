@@ -1,0 +1,144 @@
+﻿@model MegaProject.Models.Project
+@{
+ViewData["Title"] = "Project Detalis";
+}
+<h5>@Model.Name (@Model.Employees.Count)</h5>
+<input type="hidden" id="manager-id" value="@Model.ManagerId" />
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var emp in Model.Employees)
+    {
+        bool isManager = emp.Id == Model.ManagerId;
+        <tr>
+            <td>@emp.FirstName @emp.MiddleName @emp.LastName</td>
+            <td>@emp.Mail</td>
+            <td>
+                @if (isManager)
+                {
+                    <span class="badge bg-primary">Manager</span>
+                }
+            </td>
+            <td>
+                @if (!isManager)
+                {
+                    <form asp-action="SetManager" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="projectId" value="@Model.Id" />
+                        <input type="hidden" name="employeeId" value="@emp.Id" />
+                        <button type="submit" class="btn btn-sm btn-warning">
+                            Make Manager
+                        </button>
+                    </form>
+
+                    <form asp-action="RemoveEmployee" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="projectId" value="@Model.Id" />
+                        <input type="hidden" name="employeeId" value="@emp.Id" />
+                        <button type="submit" class="btn btn-sm btn-danger">
+                            Remove
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <span class="badge bg-primary">Manager</span>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+<h5 class="mt-4">Add Employees</h5>
+
+<form asp-action="AddEmployees" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="projectId" value="@Model.Id" />
+
+    <div class="mb-2">
+        <input type="text" id="add-emp-search" class="form-control" placeholder="Search employees..." />
+    </div>
+
+    <select id="add-emp-select" name="employeeIds" class="form-select mb-2" multiple size="5"></select>
+
+    <button type="submit" class="btn btn-success">
+        Add Selected Employees
+    </button>
+</form>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', async () => {
+
+    document.getElementById('add-emp-search')?.addEventListener('input', async function () {
+        const term = this.value;
+
+        const response = await fetch(`/Project/SearchEmployees?term=${encodeURIComponent(term)}`);
+        const employees = await response.json();
+
+        renderEmployees(employees);
+    });
+
+    const select = document.getElementById('add-emp-select');
+    if (!select) return;
+    
+    // Mark as loading
+    const option = document.createElement('option');
+    option.textContent = "Loading...";
+    option.disabled = true;
+    select.appendChild(option);
+    
+    // Fill select with a suitable employee
+    try {
+        const response = await fetch('/Project/SearchEmployees?term=');
+        const employees = await response.json();
+
+        renderEmployees(employees);
+    } catch (e) {
+        console.error('Initial load failed', e);
+    }
+});
+
+function renderEmployees(employees) {
+    const select = document.getElementById('add-emp-select');
+    const existingIds = getExistingEmployeeIds();
+
+    select.innerHTML = '';
+
+    employees
+        .filter(emp => !existingIds.includes(emp.id))
+        .forEach(emp => {
+            const option = document.createElement('option');
+            option.value = emp.id;
+            option.textContent = `${emp.firstName} ${emp.lastName} (${emp.mail})`;
+            select.appendChild(option);
+        });
+        
+    if (select.children.length === 0) {
+        const option = document.createElement('option');
+        option.textContent = "No available employees";
+        option.disabled = true;
+        select.appendChild(option);
+    }
+}
+
+function getExistingEmployeeIds() {
+    const employeeIds = [...document.querySelectorAll('input[name="employeeId"]')]
+        .map(e => e.value);
+
+    const managerId = document.getElementById('manager-id')?.value;
+
+    if (managerId) {
+        employeeIds.push(managerId);
+    }
+
+    return employeeIds;
+}
+</script>

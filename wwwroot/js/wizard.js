@@ -26,6 +26,7 @@ async function searchEmployees(term, selectId, isMultiple = false) {
     } catch (error) {
         console.error('[ERROR] SearchEmployees failed:', error);
     }
+    $.validator.unobtrusive.parse("#wizard-form");
 }
 
 // Drag & Drop
@@ -67,7 +68,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Next/Prev buttons
     document.querySelectorAll('.next-step').forEach(btn => {
-        btn.addEventListener('click', () => { currentStep = parseInt(btn.dataset.next); showStep(currentStep); });
+        btn.addEventListener('click', function () {
+
+            const form = $("#wizard-form");
+            const currentStepDiv = this.closest('.wizard-step');
+
+            let isValid = true;
+
+            $(currentStepDiv).find("input, select").each(function () {
+                if (!$(this).valid()) {
+                    isValid = false;
+                }
+            });
+
+            if (!isValid) {
+                return;
+            }
+            
+            if (currentStep === 1) {
+                const startInput = document.querySelector('[name="Start"]');
+                const endInput = document.querySelector('[name="End"]');
+
+                const start = startInput.value;
+                const end = endInput.value;
+
+                if (start && end && new Date(end) < new Date(start)) {
+
+                    const errorSpan = document.querySelector('[data-valmsg-for="End"]');
+                    errorSpan.textContent = "End date must be after start date";
+                    endInput.classList.add("input-validation-error");
+
+                    return;
+                } else {
+                    const errorSpan = document.querySelector('[data-valmsg-for="End"]');
+                    if(errorSpan) {
+                        errorSpan.textContent = "";
+                        endInput.classList.remove("input-validation-error");
+                    }
+                }
+            }
+
+            currentStep = parseInt(this.dataset.next);
+            showStep(currentStep);
+        });
     });
     document.querySelectorAll('.prev-step').forEach(btn => {
         btn.addEventListener('click', () => { currentStep = parseInt(btn.dataset.prev); showStep(currentStep); });

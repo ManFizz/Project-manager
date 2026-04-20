@@ -1,5 +1,4 @@
-﻿using MegaProject.Data;
-using MegaProject.Models;
+﻿using MegaProject.Models;
 using MegaProject.Services;
 using MegaProject.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -12,24 +11,23 @@ namespace MegaProject.Controllers;
 /// </summary>
 public class ProjectController : Controller
 {
-    private readonly ApplicationDbContext _context;
     private readonly IProjectService _projectService;
 
-    // GET: /Project — list of all projects
-    public async Task<IActionResult> Index()
+    public ProjectController(IProjectService projectService)
     {
-        var projects = await _context.Projects
-            .OrderBy(e => e.Priority)
-            .ThenBy(e => e.Name)
-            .Include(e => e.Manager)
-            .ToListAsync();
-        return View(projects);
-    }
-    
-    public ProjectController(ApplicationDbContext context, IProjectService projectService)
-    {
-        _context = context;
         _projectService = projectService;
+    }
+
+    // GET: /Project — list of all projects with filtering and sorting
+    public async Task<IActionResult> Index(
+        string? search,
+        DateTime? startFrom,
+        DateTime? startTo,
+        int? minPriority,
+        int? maxPriority)
+    {
+        var projects = await _projectService.GetAllProjectsAsync(search, startFrom, startTo, minPriority, maxPriority);
+        return View(projects);
     }
 
     // GET: /Project/Create
@@ -43,14 +41,19 @@ public class ProjectController : Controller
         return View(model);
     }
 
-    
-    // POST: /Project/Create
+    // POST: /Project/Create — save project from wizard
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(ProjectCreateViewModel model)
     {
         if (!ModelState.IsValid)
             return View(model);
+        
+        if (model.End < model.Start)
+        {
+            ModelState.AddModelError("End", "End date must be after start date");
+            return View(model);
+        }
 
         var project = new Project
         {
@@ -61,20 +64,71 @@ public class ProjectController : Controller
             Start = model.Start,
             End = model.End,
             Priority = model.Priority,
-            DocumentPaths = model.DocumentPaths ?? new List<string>()
+            DocumentPaths = model.DocumentPaths
         };
 
         await _projectService.CreateProjectAsync(project);
 
-        if (model.SelectedEmployeeIds?.Any() == true)
+        var employeeIds = new List<Guid> { model.ManagerId };
+        if (model.SelectedEmployeeIds.Count != 0)
+            employeeIds.AddRange(model.SelectedEmployeeIds);
+
+        await _projectService.AddEmployeesToProjectAsync(project.Id, employeeIds.Distinct().ToList());
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    // GET: /Project/Edit/{id}
+    [HttpGet]
+    public async Task<IActionResult> Edit(Guid id)
+    {
+        var project = await _projectService.GetProjectByIdAsync(id);
+        if (project == null) return NotFound();
+
+        return View(project);
+    }
+
+    // POST: /Project/Edit/{id}
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(Guid id, Project project)
+    {
+        if (id != project.Id) return NotFound();
+
+        var existingProject = await _projectService.GetProjectByIdAsync(id);
+        if (existingProject == null) return NotFound();
+
+        if (!ModelState.IsValid)
+            return View(project);
+
+        if (project.End < project.Start)
         {
-            await _projectService.AddEmployeesToProjectAsync(project.Id, model.SelectedEmployeeIds);
+            ModelState.AddModelError("End", "End date must be after start date");
+            return View(project);
         }
 
-        return RedirectToAction("Index", "Home");
+        existingProject.Name = project.Name;
+        existingProject.ClientName = project.ClientName;
+        existingProject.ExecutorName = project.ExecutorName;
+        existingProject.Start = project.Start;
+        existingProject.End = project.End;
+        existingProject.Priority = project.Priority;
+        // ManagerId & list Employees dont change
+
+        await _projectService.UpdateProjectAsync(existingProject);
+        return RedirectToAction(nameof(Index));
     }
-    
-    // GET: /Employee/SearchEmployees/{term}
+
+    // POST: /Project/Delete/{id}
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        await _projectService.DeleteProjectAsync(id);
+        return RedirectToAction(nameof(Index));
+    }
+
+    // GET: /Project/SearchEmployees/{term} - AJAX search employees (used in wizard)
     [HttpGet]
     public async Task<JsonResult> SearchEmployees(string term)
     {
@@ -87,6 +141,68 @@ public class ProjectController : Controller
             mail = e.Mail
         });
 
-        return new JsonResult(result);
+        return Json(result);
+    }
+    
+    // GET: /Project/Details/{id}
+    [HttpGet]
+    public async Task<IActionResult> Details(Guid id)
+    {
+        var project = await _projectService.GetProjectByIdAsync(id);
+        if (project == null) return NotFound();
+
+        return View(project);
+    }
+
+    // POST: /Project/AddEmployees - Add employees to existing project
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddEmployees(Guid projectId, List<Guid> employeeIds)
+    {
+        employeeIds = employeeIds.Distinct().ToList();
+        if (employeeIds.Count != 0)
+            await _projectService.AddEmployeesToProjectAsync(projectId, employeeIds);
+        
+        return RedirectToAction(nameof(Details), new { id = projectId });
+    }
+    
+    // POST: /Project/RemoveEmployee - Add employees on existing project
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RemoveEmployee(Guid projectId, Guid employeeId)
+    {
+        var project = await _projectService.GetProjectByIdAsync(projectId);
+        if (project == null)
+            return RedirectToAction(nameof(Details), new { id = projectId });
+        
+        var employee = project.Employees.FirstOrDefault(e => e.Id == employeeId);
+        if (employee == null)
+            return RedirectToAction(nameof(Details), new { id = projectId });
+        
+        project.Employees.Remove(employee);
+        await _projectService.UpdateProjectAsync(project);
+        
+        return RedirectToAction(nameof(Details), new { id = projectId });
+    }
+    
+    // POST: /Project/SetManager - Change manager on existing project
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SetManager(Guid projectId, Guid employeeId)
+    {
+        var project = await _projectService.GetProjectByIdAsync(projectId);
+        if (project == null)
+            return RedirectToAction(nameof(Index));
+
+        if (project.Employees.All(e => e.Id != employeeId))
+        {
+            await _projectService.AddEmployeesToProjectAsync(projectId, [employeeId]);
+        }
+
+        project.ManagerId = employeeId;
+
+        await _projectService.UpdateProjectAsync(project);
+
+        return RedirectToAction(nameof(Details), new { id = projectId });
     }
 }

@@ -14,10 +14,12 @@ ViewData["Title"] = "Projects";
             <th>Client name</th>
             <th>Executor name</th>
             <th>Manager</th>
+            <th>Members</th>
             <th>Date of start</th>
             <th>Date of end</th>
             <th>Priority</th>
             <th>Documents</th>
+            <th>Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -28,10 +30,22 @@ ViewData["Title"] = "Projects";
             <td>@project.ClientName</td>
             <td>@project.ExecutorName</td>
             <td>@project.Manager!.FirstName @project.Manager.MiddleName @project.Manager.LastName</td>
-            <td>@project.Start</td>
-            <td>@project.End</td>
+            <td>@project.Employees.Count</td>
+            <td>@project.Start.ToShortDateString()</td>
+            <td>@project.End.ToShortDateString()</td>
             <td>@project.Priority</td>
             <td>@project.DocumentPaths.Count</td>
+            <td style="width: 201px">
+                <a asp-action="Details" asp-route-id="@project.Id" class="btn btn-sm btn-primary">Members</a>
+                <a asp-action="Edit" asp-route-id="@project.Id" class="btn btn-sm btn-primary">Edit</a>
+                <form asp-action="Delete" asp-route-id="@project.Id" method="post" style="display:inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-sm btn-danger"
+                            onclick="return confirm('Are you sure you want to delete this project?')">
+                        Delete
+                    </button>
+                </form>
+            </td>
         </tr>
         }
         </tbody>

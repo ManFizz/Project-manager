@@ -1,0 +1,47 @@
+﻿@model MegaProject.Models.Project
+@{
+ViewData["Title"] = "Edit Project";
+}
+
+<div class="container mt-5">
+    <h2>Edit Project "@Model.Name"</h2>
+    <form asp-action="Edit" method="post">
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id"/>
+
+        <div class="mb-3">
+            <label>Project Name</label>
+            <input asp-for="Name" class="form-control"/>
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label>Customer Company</label>
+            <input asp-for="ClientName" class="form-control"/>
+            <span asp-validation-for="ClientName" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label>Executor Company</label>
+            <input asp-for="ExecutorName" class="form-control"/>
+            <span asp-validation-for="ExecutorName" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label>Start Date</label>
+            <input asp-for="Start" type="date" class="form-control"/>
+            <span asp-validation-for="Start" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label>End Date</label>
+            <input asp-for="End" type="date" class="form-control"/>
+            <span asp-validation-for="End" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label>Priority</label>
+            <input asp-for="Priority" type="number" class="form-control"/>
+            <span asp-validation-for="Priority" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>

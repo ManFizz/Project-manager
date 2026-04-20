@@ -120,4 +120,20 @@ public class ProjectService : IProjectService
             await _context.SaveChangesAsync();
         }
     }
+    
+    public async Task RemoveEmployeeFromProjectAsync(Guid projectId, Guid employeeId)
+    {
+        var project = await _context.Projects
+            .Include(p => p.Employees)
+            .FirstOrDefaultAsync(p => p.Id == projectId);
+
+        if (project == null) return;
+
+        var employee = project.Employees.FirstOrDefault(e => e.Id == employeeId);
+        if (employee != null)
+        {
+            project.Employees.Remove(employee);
+            await _context.SaveChangesAsync();
+        }
+    }
 }
