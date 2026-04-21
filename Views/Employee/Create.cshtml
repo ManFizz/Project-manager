@@ -10,18 +10,22 @@ ViewData["Title"] = "Create Employee";
         <div class="mb-3">
             <label class="form-label">First Name</label>
             <input asp-for="FirstName" class="form-control" />
+            <span asp-validation-for="FirstName" class="text-danger"></span>
         </div>
         <div class="mb-3">
             <label class="form-label">Last Name</label>
             <input asp-for="LastName" class="form-control" />
+            <span asp-validation-for="LastName" class="text-danger"></span>
         </div>
         <div class="mb-3">
             <label class="form-label">Middle Name</label>
             <input asp-for="MiddleName" class="form-control" />
+            <span asp-validation-for="MiddleName" class="text-danger"></span>
         </div>
         <div class="mb-3">
             <label class="form-label">Email</label>
             <input asp-for="Mail" class="form-control" />
+            <span asp-validation-for="Mail" class="text-danger"></span>
         </div>
         <button type="submit" class="btn btn-primary">Create</button>
         <a asp-action="Index" class="btn btn-secondary">Cancel</a>
