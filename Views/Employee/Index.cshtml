@@ -6,7 +6,9 @@ ViewData["Title"] = "Employees";
 <div class="container mt-4">
     <h2>Employees</h2>
     <a asp-action="Create" class="btn btn-success mb-3">+ Add New Employee</a>
-
+    
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+    
     <table class="table table-striped">
         <thead>
         <tr>
