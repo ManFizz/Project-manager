@@ -62,6 +62,9 @@ ViewData["Title"] = "Create New Project";
         <!-- STEP 3 -->
         <div id="step-3" class="wizard-step" style="display:none;">
             <h4>Step 3: Project Manager</h4>
+            <a asp-action="Create" asp-controller="Employee" target="_blank" class="btn btn-success mb-3">Add New Employee</a>
+            <button type="button" class="btn btn-primary mb-3" onclick="searchEmployees(
+document.getElementById('manager-search').value, 'manager-select', true)">Refresh</button>
             <input type="text" id="manager-search" class="form-control mb-2" placeholder="Search by name or email..." />
             <select asp-for="ManagerId" id="manager-select" class="form-select" size="8"></select>
             <span asp-validation-for="ManagerId" class="text-danger"></span>
@@ -72,6 +75,9 @@ ViewData["Title"] = "Create New Project";
         <!-- STEP 4 -->
         <div id="step-4" class="wizard-step" style="display:none;">
             <h4>Step 4: Project Team Members</h4>
+            <a asp-action="Create" asp-controller="Employee" target="_blank" class="btn btn-success mb-3">Add New Employee</a>
+            <button type="button" class="btn btn-primary mb-3" onclick="searchEmployees(
+document.getElementById('employees-search').value, 'employees-select', true)">Refresh</button>
             <input type="text" id="employees-search" class="form-control mb-2" placeholder="Search by name or email..." />
             <select asp-for="SelectedEmployeeIds" id="employees-select" class="form-select" size="8" multiple></select>
             <span asp-validation-for="SelectedEmployeeIds" class="text-danger"></span>
