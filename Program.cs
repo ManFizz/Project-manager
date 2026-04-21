@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using MegaProject.Data;
 using MegaProject.Services;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -37,5 +43,21 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+var opened = false;
+
+_ = Task.Run(async () =>
+{
+    if (opened) return;
+
+    await Task.Delay(1500);
+
+    Process.Start(new ProcessStartInfo
+    {
+        FileName = "http://localhost:5000",
+        UseShellExecute = true
+    });
+
+    opened = true;
+});
 
 app.Run();
