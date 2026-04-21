@@ -7,10 +7,7 @@ namespace MegaProject.Services;
 /// </summary>
 public interface IProjectService
 {
-    Task<IEnumerable<Project>> GetAllProjectsAsync(string? search = null, 
-        DateTime? startFrom = null, DateTime? startTo = null, 
-        int? minPriority = null, int? maxPriority = null,
-        string? sortColumn = "Priority", string? sortDirection = "desc");
+    Task<IEnumerable<Project>> GetAllProjectsAsync();
 
     Task<Project?> GetProjectByIdAsync(Guid id);
     Task CreateProjectAsync(Project project);

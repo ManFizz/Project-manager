@@ -29,10 +29,12 @@ public class ProjectController : Controller
         // FILTERS
         if (!string.IsNullOrWhiteSpace(model.Search))
         {
+            var search = model.Search.ToLower();
+
             query = query.Where(p =>
-                p.Name.Contains(model.Search) ||
-                p.ClientName.Contains(model.Search) ||
-                p.ExecutorName.Contains(model.Search));
+                p.Name.ToLower().Contains(search) ||
+                p.ClientName.ToLower().Contains(search) ||
+                p.ExecutorName.ToLower().Contains(search));
         }
 
         if (model.StartFrom.HasValue)
