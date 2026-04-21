@@ -18,7 +18,7 @@ public class ProjectCreateViewModel
     [Required]
     public DateTime End { get; set; } = DateTime.Today.AddDays(30);
 
-    [Range(1, 10)]
+    [Range(1, 15)]
     public int Priority { get; set; } = 5;
 
     [Required]
@@ -30,7 +30,7 @@ public class ProjectCreateViewModel
     [Required]
     public Guid ManagerId { get; set; }
 
-    public List<Guid> SelectedEmployeeIds { get; set; } = new();
+    public List<Guid>? SelectedEmployeeIds { get; set; } = new();
 
     public List<string> DocumentPaths { get; set; } = new();
 
