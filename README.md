@@ -35,7 +35,7 @@ Implements a 5-step wizard for project creation, file uploads, filtering, and so
     - Data Access Layer (EF Core)
     - Business Logic Layer
     - Presentation Layer (MVC + Razor)
-- Database: SQLite (can be switched to MSSQL)
+- Database: SQLite
 
 ## 🛠 Technologies
 
