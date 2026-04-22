@@ -117,22 +117,28 @@ public class ProjectController : Controller
             ManagerId = model.ManagerId,
             Start = model.Start,
             End = model.End,
-            Priority = model.Priority,
-            DocumentPaths = model.DocumentPaths
+            Priority = model.Priority
         };
-        
-        var paths = await _fileService.SaveFilesAsync(model.Files);
-        project.DocumentPaths.AddRange(paths);
-
-        await _projectService.CreateProjectAsync(project);
 
         var employeeIds = new List<Guid> { model.ManagerId };
-        if (model.SelectedEmployeeIds.Count != 0)
-            employeeIds.AddRange(model.SelectedEmployeeIds);
+        if (model.SelectedEmployeeIds!.Count != 0)
+            employeeIds.AddRange(model.SelectedEmployeeIds!);
 
-        await _projectService.AddEmployeesToProjectAsync(project.Id, employeeIds.Distinct().ToList());
+        try
+        {
+            await _projectService.CreateProjectAsync(
+                project,
+                employeeIds.Distinct().ToList(),
+                model.Files
+            );
 
-        return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index));
+        }
+        catch
+        {
+            ModelState.AddModelError("", "Failed to create project");
+            return View(model);
+        }
     }
 
     // GET: /Project/Edit/{id}

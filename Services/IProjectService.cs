@@ -10,14 +10,9 @@ public interface IProjectService
     IQueryable<Project> GetProjectsQuery();
 
     Task<Project?> GetProjectByIdAsync(Guid id);
-    Task CreateProjectAsync(Project project);
+    Task CreateProjectAsync(Project project, List<Guid> employeeIds, List<IFormFile> files);
     Task UpdateProjectAsync(Project project);
     Task DeleteProjectAsync(Guid id);
-
-    // Дополнительно для визарда
     Task<IEnumerable<Employee>> SearchEmployeesAsync(string term);
     Task AddEmployeesToProjectAsync(Guid projectId, List<Guid> employeeIds);
-    Task SetManagerAsync(Guid projectId, Guid managerId);
-    
-    Task RemoveEmployeeFromProjectAsync(Guid projectId, Guid employeeId);
 }

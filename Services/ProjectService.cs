@@ -10,10 +10,12 @@ namespace MegaProject.Services;
 public class ProjectService : IProjectService
 {
     private readonly ApplicationDbContext _context;
+    private readonly IFileService _fileService;
 
-    public ProjectService(ApplicationDbContext context)
+    public ProjectService(ApplicationDbContext context, IFileService fileService)
     {
         _context = context;
+        _fileService = fileService;
     }
 
     public IQueryable<Project> GetProjectsQuery()
@@ -29,12 +31,6 @@ public class ProjectService : IProjectService
             .Include(p => p.Manager)
             .Include(p => p.Employees)
             .FirstOrDefaultAsync(p => p.Id == id);
-    }
-
-    public async Task CreateProjectAsync(Project project)
-    {
-        _context.Projects.Add(project);
-        await _context.SaveChangesAsync();
     }
 
     public async Task UpdateProjectAsync(Project project)
@@ -85,30 +81,36 @@ public class ProjectService : IProjectService
 
         await _context.SaveChangesAsync();
     }
-
-    public async Task SetManagerAsync(Guid projectId, Guid managerId)
-    {
-        var project = await _context.Projects.FindAsync(projectId);
-        if (project != null)
-        {
-            project.ManagerId = managerId;
-            await _context.SaveChangesAsync();
-        }
-    }
     
-    public async Task RemoveEmployeeFromProjectAsync(Guid projectId, Guid employeeId)
+    public async Task CreateProjectAsync(Project project, List<Guid> employeeIds, List<IFormFile> files)
     {
-        var project = await _context.Projects
-            .Include(p => p.Employees)
-            .FirstOrDefaultAsync(p => p.Id == projectId);
+        using var transaction = await _context.Database.BeginTransactionAsync();
 
-        if (project == null) return;
-
-        var employee = project.Employees.FirstOrDefault(e => e.Id == employeeId);
-        if (employee != null)
+        try
         {
-            project.Employees.Remove(employee);
+            var paths = await _fileService.SaveFilesAsync(files);
+            project.DocumentPaths.AddRange(paths);
+
+            _context.Projects.Add(project);
             await _context.SaveChangesAsync();
+
+            var employees = await _context.Employees
+                .Where(e => employeeIds.Contains(e.Id))
+                .ToListAsync();
+
+            project.Employees = employees;
+
+            await _context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            
+            _fileService.DeleteFiles(project.DocumentPaths);
+
+            throw;
         }
     }
 }
