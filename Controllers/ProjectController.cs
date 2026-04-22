@@ -24,30 +24,30 @@ public class ProjectController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(ProjectListViewModel model)
     {
-        var query = await _projectService.GetAllProjectsAsync();
+        var query = _projectService.GetProjectsQuery();
 
         // FILTERS
         if (!string.IsNullOrWhiteSpace(model.Search))
         {
-            var search = model.Search.ToLower();
+            var search = model.Search;
 
             query = query.Where(p =>
-                p.Name.ToLower().Contains(search) ||
-                p.ClientName.ToLower().Contains(search) ||
-                p.ExecutorName.ToLower().Contains(search));
+                p.Name.Contains(search) ||
+                p.ClientName.Contains(search) ||
+                p.ExecutorName.Contains(search));
         }
 
         if (model.StartFrom.HasValue)
-            query = query.Where(p => p.Start >= model.StartFrom);
+            query = query.Where(p => p.Start >= model.StartFrom.Value);
 
         if (model.StartTo.HasValue)
-            query = query.Where(p => p.Start <= model.StartTo);
+            query = query.Where(p => p.Start <= model.StartTo.Value);
 
         if (model.MinPriority.HasValue)
-            query = query.Where(p => p.Priority >= model.MinPriority);
+            query = query.Where(p => p.Priority >= model.MinPriority.Value);
 
         if (model.MaxPriority.HasValue)
-            query = query.Where(p => p.Priority <= model.MaxPriority);
+            query = query.Where(p => p.Priority <= model.MaxPriority.Value);
 
         // SORTING
         query = model.SortColumn switch
@@ -79,7 +79,7 @@ public class ProjectController : Controller
             _ => query.OrderBy(x => x.Name)
         };
 
-        model.Projects = query.ToList();
+        model.Projects = await query.ToListAsync();
 
         return View(model);
     }

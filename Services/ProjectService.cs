@@ -16,15 +16,12 @@ public class ProjectService : IProjectService
         _context = context;
     }
 
-    public async Task<IEnumerable<Project>> GetAllProjectsAsync()
-{
-    var query = _context.Projects
-        .Include(p => p.Manager)
-        .Include(p => p.Employees)
-        .AsQueryable();
-
-    return await query.ToListAsync();
-}
+    public IQueryable<Project> GetProjectsQuery()
+    {
+        return _context.Projects
+            .Include(p => p.Manager)
+            .Include(p => p.Employees);
+    }
 
     public async Task<Project?> GetProjectByIdAsync(Guid id)
     {

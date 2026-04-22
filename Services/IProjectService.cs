@@ -7,7 +7,7 @@ namespace MegaProject.Services;
 /// </summary>
 public interface IProjectService
 {
-    Task<IEnumerable<Project>> GetAllProjectsAsync();
+    IQueryable<Project> GetProjectsQuery();
 
     Task<Project?> GetProjectByIdAsync(Guid id);
     Task CreateProjectAsync(Project project);
