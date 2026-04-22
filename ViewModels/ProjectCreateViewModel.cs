@@ -33,8 +33,6 @@ public class ProjectCreateViewModel
     public List<Guid>? SelectedEmployeeIds { get; set; } = new();
 
     public List<string> DocumentPaths { get; set; } = new();
-
-    public List<Employee> Employees { get; set; } = new();
     
     public List<IFormFile> Files { get; set; } = new();
 }

@@ -1,4 +1,4 @@
-﻿@model MegaProject.Models.Project
+﻿@model MegaProject.ViewModels.ProjectEditViewModel
 @{
 ViewData["Title"] = "Edit Project";
 }
@@ -49,7 +49,7 @@ ViewData["Title"] = "Edit Project";
         <h5>Add New Files</h5>
         <div id="drop-zone" class="border border-2 border-dashed p-4 text-center mb-3">
             Drop files here or <strong>click</strong>
-            <input type="file" id="file-input" name="files" multiple style="display:none;" />
+            <input type="file" id="file-input" name="Files" multiple style="display:none;" />
             <span asp-validation-for="DocumentPaths" class="text-danger"></span>
         </div>
         <div id="upload-errors"></div>

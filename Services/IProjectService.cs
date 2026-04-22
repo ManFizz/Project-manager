@@ -1,4 +1,5 @@
 ﻿using MegaProject.Models;
+using MegaProject.ViewModels;
 
 namespace MegaProject.Services;
 
@@ -8,11 +9,15 @@ namespace MegaProject.Services;
 public interface IProjectService
 {
     IQueryable<Project> GetProjectsQuery();
-
     Task<Project?> GetProjectByIdAsync(Guid id);
-    Task CreateProjectAsync(Project project, List<Guid> employeeIds, List<IFormFile> files);
-    Task UpdateProjectAsync(Project project);
+    Task CreateProjectAsync(ProjectCreateViewModel project);
+    Task UpdateProjectAsync(Project updated, List<IFormFile> files, Guid? id = null);
     Task DeleteProjectAsync(Guid id);
-    Task<IEnumerable<Employee>> SearchEmployeesAsync(string term);
-    Task AddEmployeesToProjectAsync(Guid projectId, List<Guid> employeeIds);
+    Task<List<EmployeeDto>> SearchEmployeesAsync(string term);
+    Task RemoveEmployeeAsync(Guid projectId, Guid employeeId);
+    Task AddEmployeesAsync(Guid projectId, List<Guid> employeeIds);
+    Task DeleteFileAsync(Guid projectId, string filePath);
+    Task SetManagerAsync(Guid projectId, Guid employeeId);
+    Task<ProjectListViewModel> GetProjectsAsync(ProjectListViewModel model);
+    Task UpdateProjectAsync(Guid id, ProjectEditViewModel model);
 }

@@ -45,28 +45,33 @@ public class FileService : IFileService
     
     public void DeleteFiles(IEnumerable<string> paths)
     {
-        var root = Directory.GetCurrentDirectory();
         foreach (var relativePath in paths)
         {
-            if (string.IsNullOrWhiteSpace(relativePath))
-                continue;
+            DeleteFile(relativePath);
+        }
+    }
 
-            try
+    private readonly string _root = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+    public void DeleteFile(string relativePath)
+    {
+        if (string.IsNullOrWhiteSpace(relativePath))
+            return;
+
+        try
+        {
+            if (!relativePath.StartsWith("/uploads"))
+                return;
+
+            var fullPath = Path.Combine(_root, relativePath.TrimStart('/'));
+
+            if (File.Exists(fullPath))
             {
-                if (!relativePath.StartsWith("/uploads"))
-                    continue;
-
-                var fullPath = Path.Combine(root, "wwwroot", relativePath.TrimStart('/'));
-
-                if (File.Exists(fullPath))
-                {
-                    File.Delete(fullPath);
-                }
+                File.Delete(fullPath);
             }
-            catch
-            {
-                // ignored
-            }
+        }
+        catch
+        {
+            // ignored
         }
     }
 }
