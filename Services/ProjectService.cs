@@ -1,5 +1,5 @@
 ﻿using MegaProject.Data;
-using MegaProject.Models;
+using MegaProject.Domain.Models;
 using MegaProject.ViewModels;
 using Microsoft.EntityFrameworkCore;
 

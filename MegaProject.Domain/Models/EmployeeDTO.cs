@@ -1,4 +1,4 @@
-﻿namespace MegaProject.Models;
+﻿namespace MegaProject.Domain.Models;
 
 public class EmployeeDto
 {

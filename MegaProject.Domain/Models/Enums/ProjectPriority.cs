@@ -1,4 +1,4 @@
-﻿namespace MegaProject.Models.Enums;
+﻿namespace MegaProject.Domain.Models.Enums;
 
 public enum ProjectPriority
 {

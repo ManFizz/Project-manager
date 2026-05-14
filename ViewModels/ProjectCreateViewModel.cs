@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using MegaProject.Models;
 
 namespace MegaProject.ViewModels;
 

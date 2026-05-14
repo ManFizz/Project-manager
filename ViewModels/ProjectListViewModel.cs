@@ -1,4 +1,4 @@
-﻿using MegaProject.Models;
+﻿using MegaProject.Domain.Models;
 
 namespace MegaProject.ViewModels;
 

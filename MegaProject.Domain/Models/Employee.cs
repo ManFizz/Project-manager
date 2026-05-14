@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MegaProject.Models;
+namespace MegaProject.Domain.Models;
 
 /// <summary>
 /// Employee (used both as a regular contractor and as a project manager)

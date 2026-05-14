@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using MegaProject.Models.Enums;
 
-namespace MegaProject.Models;
+namespace MegaProject.Domain.Models;
 
 /// <summary>
 /// Project (main entity)

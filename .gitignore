@@ -4,3 +4,25 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 /wwwroot/uploads/
+.claude/
+.idea/
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# User-specific files
+*.user
+*.suo
+.vs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+appsettings.local.json
+appsettings.*.local.json
