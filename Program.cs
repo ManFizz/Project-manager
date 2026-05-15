@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using MegaProject.Data;
 using MegaProject.Services;
+using MegaProject.Web.Services;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -14,6 +15,7 @@ builder.Services.AddControllersWithViews();
 
 // Business Logic Layer
 builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
 // Data Access Layer
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

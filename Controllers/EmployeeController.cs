@@ -1,34 +1,20 @@
-﻿using MegaProject.Data;
-using MegaProject.Domain.Models;
-using MegaProject.Services;
+﻿using MegaProject.Domain.Models;
+using MegaProject.Domain.Models.Exceptions;
+using MegaProject.Web.Services;
 using MegaProject.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace MegaProject.Controllers;
+namespace MegaProject.Web.Controllers;
 
 /// <summary>
 /// CRUD controller for Employees
 /// </summary>
-public class EmployeeController : Controller
+public class EmployeeController(IEmployeeService employeeService) : Controller
 {
-    private readonly ApplicationDbContext _context;
-    private readonly IProjectService _projectService;
-
-    public EmployeeController(ApplicationDbContext context, IProjectService projectService)
-    {
-        _context = context;
-        _projectService = projectService;
-    }
-
     // GET: /Employee — list of all employees
     public async Task<IActionResult> Index()
     {
-        var employees = await _context.Employees
-            .OrderBy(e => e.LastName)
-            .ThenBy(e => e.FirstName)
-            .ToListAsync();
-
+        var employees = await employeeService.GetAllAsync();
         return View(employees);
     }
 
@@ -55,8 +41,7 @@ public class EmployeeController : Controller
             Mail = model.Mail
         };
 
-        _context.Employees.Add(employee);
-        await _context.SaveChangesAsync();
+        await employeeService.CreateAsync(employee);
 
         return RedirectToAction(nameof(Index));
     }
@@ -65,7 +50,8 @@ public class EmployeeController : Controller
     [HttpGet]
     public async Task<IActionResult> Edit(Guid id)
     {
-        var employee = await _context.Employees.FindAsync(id);
+        
+        var employee = await employeeService.GetByIdAsync(id);
         if (employee == null) return NotFound();
 
         var model = new CreateEmployeeViewModel
@@ -87,16 +73,24 @@ public class EmployeeController : Controller
     {
         if (!ModelState.IsValid)
             return View(model);
+        
+        var employee = new Employee
+        {
+            Id = id,
+            FirstName = model.FirstName,
+            LastName = model.LastName,
+            MiddleName = model.MiddleName,
+            Mail = model.Mail,
+        };
+        try
+        {
+            await employeeService.UpdateAsync(employee);
+        }
+        catch (NotFoundException)
+        {
+            return NotFound();
+        }
 
-        var employee = await _context.Employees.FindAsync(id);
-        if (employee == null) return NotFound();
-
-        employee.FirstName = model.FirstName;
-        employee.LastName = model.LastName;
-        employee.MiddleName = model.MiddleName;
-        employee.Mail = model.Mail;
-
-        await _context.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
     }
 
@@ -105,23 +99,20 @@ public class EmployeeController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var employee = await _context.Employees
-            .Include(e => e.ManagedProjects)
-            .FirstOrDefaultAsync(e => e.Id == id);
-
-        if (employee == null) return NotFound();
-
-        // Block deletion if the employee is the manager of at least one project.
-        if (employee.ManagedProjects.Count != 0)
+        try
         {
-            ModelState.AddModelError(string.Empty, "Cannot delete employee who is a manager of one or more projects.");
-            var employees = await _context.Employees.ToListAsync();
+            await employeeService.DeleteAsync(id);
+            return RedirectToAction(nameof(Index));
+        }
+        catch (NotFoundException)
+        {
+            return NotFound();
+        }
+        catch(BusinessRuleException e)
+        {
+            ModelState.AddModelError(string.Empty, e.Message);
+            var employees = await employeeService.GetAllAsync();
             return View("Index", employees);
         }
-
-        _context.Employees.Remove(employee);
-        await _context.SaveChangesAsync();
-
-        return RedirectToAction(nameof(Index));
     }
 }

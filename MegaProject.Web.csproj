@@ -100,8 +100,4 @@
       <ProjectReference Include="MegaProject.Services\MegaProject.Services.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Models\Enums\" />
-    </ItemGroup>
-
 </Project>
