@@ -16,6 +16,7 @@ builder.Services.AddControllersWithViews();
 // Business Logic Layer
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
 
 // Data Access Layer
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
