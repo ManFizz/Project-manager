@@ -16,6 +16,8 @@ public class ApplicationDbContext : DbContext
     // DbSets
     public DbSet<Employee> Employees { get; set; } = null!;
     public DbSet<Project> Projects { get; set; } = null!;
+    
+    public DbSet<ProjectTask> ProjectsTasks { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -44,5 +46,23 @@ public class ApplicationDbContext : DbContext
             .WithMany(e => e.ManagedProjects)
             .HasForeignKey(p => p.ManagerId)
             .OnDelete(DeleteBehavior.Restrict); // don't delete an employee if he is a project manager
+
+        modelBuilder.Entity<ProjectTask>()
+            .HasOne(pt => pt.Worker)
+            .WithMany(e => e.WorkerTasks)
+            .HasForeignKey(pt => pt.WorkerId)
+            .OnDelete(DeleteBehavior.Restrict);
+        
+        modelBuilder.Entity<ProjectTask>()
+            .HasOne(pt => pt.Author)
+            .WithMany(e => e.AuthorTasks)
+            .HasForeignKey(pt => pt.AuthorId)
+            .OnDelete(DeleteBehavior.Restrict);
+        
+        modelBuilder.Entity<ProjectTask>()
+            .HasOne(pt => pt.Project)
+            .WithMany(e => e.ProjectTasks)
+            .HasForeignKey(pt => pt.ProjectId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

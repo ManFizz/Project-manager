@@ -16,16 +16,18 @@
       <None Remove="MegaProject.Domain\**" />
       <None Remove="MegaProject.Data\**" />
       <None Remove="MegaProject.Services\**" />
+      <None Remove="MegaProject.db" />
+      <None Remove="MegaProject.db-shm" />
+      <None Remove="MegaProject.db-wal" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.6" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.6">
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.5" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.6">
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.8">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
@@ -93,9 +95,37 @@
       <_ContentIncludedByDefault Remove="wwwroot\lib\jquery\dist\jquery.slim.min.map" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\jquery\LICENSE.txt" />
       <_ContentIncludedByDefault Remove="wwwroot\css\site.css" />
+      <_ContentIncludedByDefault Remove="MegaProject.Data\bin\Debug\net10.0\MegaProject.Data.deps.json" />
+      <_ContentIncludedByDefault Remove="MegaProject.Data\bin\Release\net10.0\MegaProject.Data.deps.json" />
+      <_ContentIncludedByDefault Remove="MegaProject.Data\obj\Debug\net10.0\MegaProject.Data.sourcelink.json" />
+      <_ContentIncludedByDefault Remove="MegaProject.Data\obj\MegaProject.Data.csproj.nuget.dgspec.json" />
+      <_ContentIncludedByDefault Remove="MegaProject.Data\obj\project.assets.json" />
+      <_ContentIncludedByDefault Remove="MegaProject.Data\obj\project.packagespec.json" />
+      <_ContentIncludedByDefault Remove="MegaProject.Data\obj\Release\net10.0\MegaProject.Data.sourcelink.json" />
+      <_ContentIncludedByDefault Remove="MegaProject.Domain\bin\Debug\net10.0\MegaProject.Domain.deps.json" />
+      <_ContentIncludedByDefault Remove="MegaProject.Domain\bin\Release\net10.0\MegaProject.Domain.deps.json" />
+      <_ContentIncludedByDefault Remove="MegaProject.Domain\obj\Debug\net10.0\MegaProject.Domain.sourcelink.json" />
+      <_ContentIncludedByDefault Remove="MegaProject.Domain\obj\MegaProject.Domain.csproj.nuget.dgspec.json" />
+      <_ContentIncludedByDefault Remove="MegaProject.Domain\obj\project.assets.json" />
+      <_ContentIncludedByDefault Remove="MegaProject.Domain\obj\project.packagespec.json" />
+      <_ContentIncludedByDefault Remove="MegaProject.Domain\obj\Release\net10.0\MegaProject.Domain.sourcelink.json" />
+      <_ContentIncludedByDefault Remove="MegaProject.Services\bin\Debug\net10.0\MegaProject.Services.deps.json" />
+      <_ContentIncludedByDefault Remove="MegaProject.Services\bin\Release\net10.0\MegaProject.Services.deps.json" />
+      <_ContentIncludedByDefault Remove="MegaProject.Services\obj\Debug\net10.0\MegaProject.Services.sourcelink.json" />
+      <_ContentIncludedByDefault Remove="MegaProject.Services\obj\MegaProject.Services.csproj.nuget.dgspec.json" />
+      <_ContentIncludedByDefault Remove="MegaProject.Services\obj\project.assets.json" />
+      <_ContentIncludedByDefault Remove="MegaProject.Services\obj\project.packagespec.json" />
+      <_ContentIncludedByDefault Remove="MegaProject.Services\obj\Release\net10.0\MegaProject.Services.sourcelink.json" />
     </ItemGroup>
 
     <ItemGroup>
+      <Content Remove="MegaProject.Data\**" />
+      <Content Remove="MegaProject.Domain\**" />
+      <Content Remove="MegaProject.Services\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="MegaProject.Data\MegaProject.Data.csproj" />
       <ProjectReference Include="MegaProject.Domain\MegaProject.Domain.csproj" />
       <ProjectReference Include="MegaProject.Services\MegaProject.Services.csproj" />
     </ItemGroup>

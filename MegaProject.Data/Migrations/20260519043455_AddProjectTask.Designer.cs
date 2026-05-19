@@ -8,19 +8,19 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace MegaProject.Migrations
+namespace MegaProject.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260417031733_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260519043455_AddProjectTask")]
+    partial class AddProjectTask
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.6");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.8");
 
-            modelBuilder.Entity("MegaProject.Models.Employee", b =>
+            modelBuilder.Entity("MegaProject.Domain.Models.Employee", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -46,7 +46,7 @@ namespace MegaProject.Migrations
                     b.ToTable("Employees");
                 });
 
-            modelBuilder.Entity("MegaProject.Models.Project", b =>
+            modelBuilder.Entity("MegaProject.Domain.Models.Project", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -87,6 +87,45 @@ namespace MegaProject.Migrations
                     b.ToTable("Projects");
                 });
 
+            modelBuilder.Entity("MegaProject.Domain.Models.ProjectTask", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("WorkerId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("WorkerId");
+
+                    b.ToTable("ProjectsTasks");
+                });
+
             modelBuilder.Entity("ProjectEmployee", b =>
                 {
                     b.Property<Guid>("EmployeeId")
@@ -102,9 +141,9 @@ namespace MegaProject.Migrations
                     b.ToTable("ProjectEmployee");
                 });
 
-            modelBuilder.Entity("MegaProject.Models.Project", b =>
+            modelBuilder.Entity("MegaProject.Domain.Models.Project", b =>
                 {
-                    b.HasOne("MegaProject.Models.Employee", "Manager")
+                    b.HasOne("MegaProject.Domain.Models.Employee", "Manager")
                         .WithMany("ManagedProjects")
                         .HasForeignKey("ManagerId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -113,24 +152,59 @@ namespace MegaProject.Migrations
                     b.Navigation("Manager");
                 });
 
+            modelBuilder.Entity("MegaProject.Domain.Models.ProjectTask", b =>
+                {
+                    b.HasOne("MegaProject.Domain.Models.Employee", "Author")
+                        .WithMany("AuthorTasks")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MegaProject.Domain.Models.Project", "Project")
+                        .WithMany("ProjectTasks")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MegaProject.Domain.Models.Employee", "Worker")
+                        .WithMany("WorkerTasks")
+                        .HasForeignKey("WorkerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Project");
+
+                    b.Navigation("Worker");
+                });
+
             modelBuilder.Entity("ProjectEmployee", b =>
                 {
-                    b.HasOne("MegaProject.Models.Employee", null)
+                    b.HasOne("MegaProject.Domain.Models.Employee", null)
                         .WithMany()
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MegaProject.Models.Project", null)
+                    b.HasOne("MegaProject.Domain.Models.Project", null)
                         .WithMany()
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MegaProject.Models.Employee", b =>
+            modelBuilder.Entity("MegaProject.Domain.Models.Employee", b =>
                 {
+                    b.Navigation("AuthorTasks");
+
                     b.Navigation("ManagedProjects");
+
+                    b.Navigation("WorkerTasks");
+                });
+
+            modelBuilder.Entity("MegaProject.Domain.Models.Project", b =>
+                {
+                    b.Navigation("ProjectTasks");
                 });
 #pragma warning restore 612, 618
         }
