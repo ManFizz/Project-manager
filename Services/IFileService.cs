@@ -1,4 +1,4 @@
-﻿namespace MegaProject.Services;
+﻿namespace MegaProject.Web.Services;
 
 public interface IFileService
 {

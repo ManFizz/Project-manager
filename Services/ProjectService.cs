@@ -1,9 +1,9 @@
 ﻿using MegaProject.Data;
 using MegaProject.Domain.Models;
-using MegaProject.ViewModels;
+using MegaProject.Web.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
-namespace MegaProject.Services;
+namespace MegaProject.Web.Services;
 
 /// <summary>
 /// Business Logic Layer - project service implementation

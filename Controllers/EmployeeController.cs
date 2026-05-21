@@ -1,7 +1,7 @@
 ﻿using MegaProject.Domain.Models;
 using MegaProject.Domain.Models.Exceptions;
 using MegaProject.Web.Services;
-using MegaProject.ViewModels;
+using MegaProject.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MegaProject.Web.Controllers;

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace MegaProject.Controllers
+namespace MegaProject.Web.Controllers
 {
     public class HomeController : Controller
     {

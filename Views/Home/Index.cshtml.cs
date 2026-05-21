@@ -1,7 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace MegaProject.Pages;
+namespace MegaProject.Web.Views.Home;
 
 public class IndexModel : PageModel
 {

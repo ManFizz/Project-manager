@@ -1,8 +1,8 @@
-﻿using MegaProject.Services;
-using MegaProject.ViewModels;
+﻿using MegaProject.Web.Services;
+using MegaProject.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MegaProject.Controllers;
+namespace MegaProject.Web.Controllers;
 
 /// <summary>
 /// CRUD controller for Projects (5-step wizard)

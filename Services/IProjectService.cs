@@ -1,7 +1,7 @@
 ﻿using MegaProject.Domain.Models;
-using MegaProject.ViewModels;
+using MegaProject.Web.ViewModels;
 
-namespace MegaProject.Services;
+namespace MegaProject.Web.Services;
 
 /// <summary>
 /// Business Logic Layer - an interface for working with projects

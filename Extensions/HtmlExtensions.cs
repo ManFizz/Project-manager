@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace MegaProject.Extensions;
+namespace MegaProject.Web.Extensions;
 
 public static class HtmlExtensions
 {

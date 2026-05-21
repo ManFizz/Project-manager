@@ -1,6 +1,6 @@
 ﻿using MegaProject.Domain.Models;
 
-namespace MegaProject.ViewModels;
+namespace MegaProject.Web.ViewModels;
 
 public class ProjectListViewModel
 {

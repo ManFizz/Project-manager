@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MegaProject.ViewModels;
+namespace MegaProject.Web.ViewModels;
 
 public class CreateEmployeeViewModel
 {
