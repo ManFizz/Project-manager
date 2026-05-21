@@ -59,4 +59,15 @@ public class EmployeeService(ApplicationDbContext context) : IEmployeeService
         context.Employees.Remove(employee);
         await context.SaveChangesAsync();
     }
+
+    public Task<List<Employee>> GetByIdProject(Guid projectId)
+    {
+        var employees = context.Employees
+            .Where(e => e.Projects.Any(p => p.Id == projectId))
+            .OrderBy(e => e.LastName)
+            .ThenBy(e => e.FirstName)
+            .ToListAsync();
+
+        return employees;
+    }
 }
