@@ -1,10 +1,10 @@
-﻿using MegaProject.Data;
+using MegaProject.Data;
 using MegaProject.Domain.Models;
 using MegaProject.Domain.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using TaskStatus = MegaProject.Domain.Models.Enums.TaskStatus;
 
-namespace MegaProject.Web.Services;
+namespace MegaProject.Services;
 
 public class ProjectTaskService(ApplicationDbContext context) : IProjectTaskService
 {
@@ -21,46 +21,42 @@ public class ProjectTaskService(ApplicationDbContext context) : IProjectTaskServ
         return query.OrderBy(t => t.Priority).ToListAsync();
     }
 
-    public Task<ProjectTask?> GetByIdAsync(Guid id)
-    {
-        return context.ProjectsTasks
+    public Task<ProjectTask?> GetByIdAsync(Guid id) =>
+        context.ProjectsTasks
             .Include(t => t.Author)
             .Include(t => t.Worker)
             .FirstOrDefaultAsync(t => t.Id == id);
-    }
 
     public Task CreateAsync(ProjectTask task)
     {
         context.ProjectsTasks.Add(task);
-
         return context.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(ProjectTask task)
     {
-        var foundTask = await GetByIdAsync(task.Id);
-        if (foundTask == null)
+        var found = await context.ProjectsTasks.FindAsync(task.Id);
+        if (found == null)
             throw new NotFoundException("Task not found");
 
-        foundTask.Name = task.Name;
-        foundTask.Comment = task.Comment;
-        foundTask.Status = task.Status;
-        foundTask.Priority = task.Priority;
-        
-        foundTask.ProjectId = task.ProjectId;
-        foundTask.AuthorId = task.AuthorId;
-        foundTask.WorkerId = task.WorkerId;
-        
+        found.Name = task.Name;
+        found.Comment = task.Comment;
+        found.Status = task.Status;
+        found.Priority = task.Priority;
+        found.ProjectId = task.ProjectId;
+        found.AuthorId = task.AuthorId;
+        found.WorkerId = task.WorkerId;
+
         await context.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(Guid id)
     {
-        var foundTask = await GetByIdAsync(id);
-        if (foundTask == null)
+        var task = await context.ProjectsTasks.FindAsync(id);
+        if (task == null)
             throw new NotFoundException("Task not found");
 
-        context.ProjectsTasks.Remove(foundTask);
+        context.ProjectsTasks.Remove(task);
         await context.SaveChangesAsync();
     }
 }

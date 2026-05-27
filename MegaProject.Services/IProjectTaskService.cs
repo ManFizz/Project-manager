@@ -1,7 +1,7 @@
-﻿using MegaProject.Domain.Models;
+using MegaProject.Domain.Models;
 using TaskStatus = MegaProject.Domain.Models.Enums.TaskStatus;
 
-namespace MegaProject.Web.Services;
+namespace MegaProject.Services;
 
 public interface IProjectTaskService
 {

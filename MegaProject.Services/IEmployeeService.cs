@@ -1,6 +1,6 @@
-﻿using MegaProject.Domain.Models;
+using MegaProject.Domain.Models;
 
-namespace MegaProject.Web.Services;
+namespace MegaProject.Services;
 
 public interface IEmployeeService
 {

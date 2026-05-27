@@ -1,45 +1,38 @@
-﻿using MegaProject.Data;
+using MegaProject.Data;
 using MegaProject.Domain.Models;
 using MegaProject.Domain.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
-namespace MegaProject.Web.Services;
+namespace MegaProject.Services;
 
 public class EmployeeService(ApplicationDbContext context) : IEmployeeService
 {
-    public Task<List<Employee>> GetAllAsync()
-    {
-        var employees = context.Employees
+    public Task<List<Employee>> GetAllAsync() =>
+        context.Employees
             .OrderBy(e => e.LastName)
             .ThenBy(e => e.FirstName)
             .ToListAsync();
-        
-        return employees;
-    }
 
-    public Task<Employee?> GetByIdAsync(Guid id)
-    {
-        var employee = context.Employees.FindAsync(id).AsTask();
-        return employee;
-    }
+    public Task<Employee?> GetByIdAsync(Guid id) =>
+        context.Employees.FindAsync(id).AsTask();
 
     public Task CreateAsync(Employee employee)
     {
         context.Employees.Add(employee);
-        
         return context.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(Employee employee)
     {
-        var foundEmployee = await GetByIdAsync(employee.Id);
-        if (foundEmployee == null)
+        var found = await GetByIdAsync(employee.Id);
+        if (found == null)
             throw new NotFoundException("Employee not found");
-        
-        foundEmployee.FirstName = employee.FirstName;
-        foundEmployee.LastName = employee.LastName;
-        foundEmployee.MiddleName = employee.MiddleName;
-        foundEmployee.Mail = employee.Mail;
+
+        found.FirstName = employee.FirstName;
+        found.LastName = employee.LastName;
+        found.MiddleName = employee.MiddleName;
+        found.Mail = employee.Mail;
+
         await context.SaveChangesAsync();
     }
 
@@ -52,7 +45,6 @@ public class EmployeeService(ApplicationDbContext context) : IEmployeeService
         if (employee == null)
             throw new NotFoundException("Employee not found");
 
-        // Block deletion if the employee is the manager of at least one project.
         if (employee.ManagedProjects.Count != 0)
             throw new BusinessRuleException("Cannot delete employee who is a manager of one or more projects.");
 
@@ -60,14 +52,10 @@ public class EmployeeService(ApplicationDbContext context) : IEmployeeService
         await context.SaveChangesAsync();
     }
 
-    public Task<List<Employee>> GetByIdProject(Guid projectId)
-    {
-        var employees = context.Employees
+    public Task<List<Employee>> GetByIdProject(Guid projectId) =>
+        context.Employees
             .Where(e => e.Projects.Any(p => p.Id == projectId))
             .OrderBy(e => e.LastName)
             .ThenBy(e => e.FirstName)
             .ToListAsync();
-
-        return employees;
-    }
 }

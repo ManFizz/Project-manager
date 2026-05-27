@@ -1,40 +1,63 @@
-﻿using MegaProject.Web.Services;
+using MegaProject.Domain.Models;
+using MegaProject.Services;
+using MegaProject.Web.Services;
 using MegaProject.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MegaProject.Web.Controllers;
 
 /// <summary>
-/// CRUD controller for Projects (5-step wizard)
+/// CRUD controller for Projects
 /// </summary>
-public class ProjectController(IProjectService projectService) : Controller
+public class ProjectController(IProjectService projectService, IFileService fileService) : Controller
 {
-    // GET: /Project — list of all projects with filtering and sorting
+    // GET: /Project
     [HttpGet]
     public async Task<IActionResult> Index(ProjectListViewModel model)
     {
-        var result = await projectService.GetProjectsAsync(model);
-        return View(result);
+        var filter = new ProjectFilter
+        {
+            Search = model.Search,
+            StartFrom = model.StartFrom,
+            StartTo = model.StartTo,
+            MinPriority = model.MinPriority,
+            MaxPriority = model.MaxPriority,
+            SortColumn = model.SortColumn,
+            SortDirection = model.SortDirection
+        };
+
+        model.Projects = await projectService.GetProjectsAsync(filter);
+        return View(model);
     }
 
     // GET: /Project/Create
     [HttpGet]
-    public IActionResult Create()
-    {
-        return View(new ProjectCreateViewModel());
-    }
+    public IActionResult Create() => View(new ProjectCreateViewModel());
 
-    // POST: /Project/Create — save project from wizard
+    // POST: /Project/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(ProjectCreateViewModel model)
     {
-        if (!ModelState.IsValid)
-            return View(model);
+        if (!ModelState.IsValid) return View(model);
 
         try
         {
-            await projectService.CreateProjectAsync(model);
+            var paths = await fileService.SaveFilesAsync(model.Files);
+
+            var project = new Project
+            {
+                Name = model.Name,
+                ClientName = model.ClientName,
+                ExecutorName = model.ExecutorName,
+                ManagerId = model.ManagerId,
+                Start = model.Start,
+                End = model.End,
+                Priority = model.Priority,
+                DocumentPaths = paths
+            };
+
+            await projectService.CreateProjectAsync(project, model.SelectedEmployeeIds);
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
@@ -69,29 +92,55 @@ public class ProjectController(IProjectService projectService) : Controller
     // POST: /Project/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(Guid id, ProjectEditViewModel updatedProject)
+    public async Task<IActionResult> Edit(Guid id, ProjectEditViewModel model)
     {
-        if (!ModelState.IsValid)
-            return View(updatedProject);
-        
+        if (!ModelState.IsValid) return View(model);
+
         try
         {
-            await projectService.UpdateProjectAsync(id, updatedProject);
+            var oldProject = await projectService.GetProjectByIdAsync(id);
+            if (oldProject == null) return NotFound();
+
+            // Сохраняем новые файлы
+            var newPaths = model.Files.Count > 0
+                ? await fileService.SaveFilesAsync(model.Files)
+                : new List<string>();
+
+            // Финальный список = те что оставили + новые
+            var finalPaths = model.DocumentPaths.Concat(newPaths).ToList();
+
+            // Удаляем файлы которые убрали из проекта
+            var deletedPaths = oldProject.DocumentPaths.Except(model.DocumentPaths).ToList();
+            fileService.DeleteFiles(deletedPaths);
+
+            var updated = new Project
+            {
+                Name = model.Name,
+                ClientName = model.ClientName,
+                ExecutorName = model.ExecutorName,
+                Start = model.Start,
+                End = model.End,
+                Priority = model.Priority,
+                DocumentPaths = finalPaths
+            };
+
+            await projectService.UpdateProjectAsync(id, updated);
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
             ModelState.AddModelError("", ex.Message);
-            return View(updatedProject);
+            return View(model);
         }
     }
-    
-    // POST: /Project/Delete/{projectId}:{filePath}
+
+    // POST: /Project/DeleteFile
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteFile(Guid projectId, string filePath)
     {
-        await projectService.DeleteFileAsync(projectId, filePath);
+        await projectService.RemoveDocumentPathAsync(projectId, filePath);
+        fileService.DeleteFile(filePath);
         return RedirectToAction("Edit", new { id = projectId });
     }
 
@@ -100,29 +149,26 @@ public class ProjectController(IProjectService projectService) : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(Guid id)
     {
-        await projectService.DeleteProjectAsync(id); //TODO: move project to archive
-        // TODO: transfer uploaded file to archive
+        var paths = await projectService.DeleteProjectAsync(id);
+        fileService.DeleteFiles(paths);
         return RedirectToAction(nameof(Index));
     }
 
-    // GET: /Project/SearchEmployees/{term} - AJAX search employees (used in wizard)
+    // GET: /Project/SearchEmployees — AJAX
     [HttpGet]
-    public async Task<JsonResult> SearchEmployees(string term)
-    {
-        return Json(await projectService.SearchEmployeesAsync(term)); // EmployeeDto
-    }
-    
+    public async Task<JsonResult> SearchEmployees(string term) =>
+        Json(await projectService.SearchEmployeesAsync(term));
+
     // GET: /Project/Details/{id}
     [HttpGet]
     public async Task<IActionResult> Details(Guid id)
     {
         var project = await projectService.GetProjectByIdAsync(id);
         if (project == null) return NotFound();
-
         return View(project);
     }
 
-    // POST: /Project/AddEmployees - Add employees to existing project
+    // POST: /Project/AddEmployees
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> AddEmployees(Guid projectId, List<Guid> employeeIds)
@@ -130,8 +176,8 @@ public class ProjectController(IProjectService projectService) : Controller
         await projectService.AddEmployeesAsync(projectId, employeeIds);
         return RedirectToAction(nameof(Details), new { id = projectId });
     }
-    
-    // POST: /Project/RemoveEmployee - Add employees on existing project
+
+    // POST: /Project/RemoveEmployee
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> RemoveEmployee(Guid projectId, Guid employeeId)
@@ -139,8 +185,8 @@ public class ProjectController(IProjectService projectService) : Controller
         await projectService.RemoveEmployeeAsync(projectId, employeeId);
         return RedirectToAction(nameof(Details), new { id = projectId });
     }
-    
-    // POST: /Project/SetManager - Change manager on existing project
+
+    // POST: /Project/SetManager
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SetManager(Guid projectId, Guid employeeId)
@@ -150,7 +196,7 @@ public class ProjectController(IProjectService projectService) : Controller
             await projectService.SetManagerAsync(projectId, employeeId);
             return RedirectToAction(nameof(Details), new { id = projectId });
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             ModelState.AddModelError("", ex.Message);
             return RedirectToAction(nameof(Index));
