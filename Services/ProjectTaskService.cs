@@ -11,6 +11,8 @@ public class ProjectTaskService(ApplicationDbContext context) : IProjectTaskServ
     public Task<List<ProjectTask>> GetByProjectAsync(Guid projectId, TaskStatus? status = null)
     {
         var query = context.ProjectsTasks
+            .Include(t => t.Author)
+            .Include(t => t.Worker)
             .Where(t => t.ProjectId == projectId);
 
         if (status != null)
@@ -22,6 +24,8 @@ public class ProjectTaskService(ApplicationDbContext context) : IProjectTaskServ
     public Task<ProjectTask?> GetByIdAsync(Guid id)
     {
         return context.ProjectsTasks
+            .Include(t => t.Author)
+            .Include(t => t.Worker)
             .FirstOrDefaultAsync(t => t.Id == id);
     }
 

@@ -10,10 +10,12 @@ namespace MegaProject.Web.Controllers;
 public class ProjectTaskController(IProjectTaskService projectTaskService, IEmployeeService employeeService) : Controller
 {
     
-    // GET: /Task/{projectId} — list of all tasks for project
+    // GET: /ProjectTask/Index?projectId={projectId}&status={status}
     public async Task<IActionResult> Index(Guid projectId, TaskStatus? status = null)
     {
         var tasks = await projectTaskService.GetByProjectAsync(projectId, status);
+        ViewBag.ProjectId = projectId;
+        ViewBag.CurrentStatus = status;
         return View(tasks);
     }
     

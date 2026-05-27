@@ -1,0 +1,103 @@
+@model List<MegaProject.Domain.Models.ProjectTask>
+@using TaskStatus = MegaProject.Domain.Models.Enums.TaskStatus
+@{
+    ViewData["Title"] = "Tasks";
+    var projectId = (Guid)ViewBag.ProjectId;
+    var currentStatus = ViewBag.CurrentStatus as TaskStatus?;
+}
+
+<div class="container mt-4">
+    <h2>Tasks</h2>
+
+    <a asp-action="Create" asp-route-projectId="@projectId" class="btn btn-success mb-3">+ Add Task</a>
+
+    <div class="mb-3 d-flex gap-2">
+        <a asp-action="Index"
+           asp-route-projectId="@projectId"
+           class="btn btn-sm @(currentStatus == null ? "btn-primary" : "btn-outline-primary")">
+            All
+        </a>
+        @foreach (TaskStatus s in Enum.GetValues(typeof(TaskStatus)))
+        {
+            <a asp-action="Index"
+               asp-route-projectId="@projectId"
+               asp-route-status="@s"
+               class="btn btn-sm @(currentStatus == s ? "btn-primary" : "btn-outline-primary")">
+                @s
+            </a>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <p class="text-muted">No tasks found.</p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Author</th>
+                <th>Worker</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var task in Model)
+            {
+                <tr>
+                    <td>@task.Name</td>
+                    <td>
+                        <span class="badge @(task.Status switch {
+                            TaskStatus.ToDo => "bg-secondary",
+                            TaskStatus.InProgress => "bg-warning text-dark",
+                            TaskStatus.Done => "bg-success",
+                            _ => "bg-secondary"
+                        })">
+                            @task.Status
+                        </span>
+                    </td>
+                    <td>@task.Priority</td>
+                    <td>
+                        @if (task.Author != null)
+                        {
+                            @($"{task.Author.LastName} {task.Author.FirstName}")
+                        }
+                    </td>
+                    <td>
+                        @if (task.Worker != null)
+                        {
+                            @($"{task.Worker.LastName} {task.Worker.FirstName}")
+                        }
+                        else
+                        {
+                            <span class="text-muted">-</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-action="Edit"
+                           asp-route-id="@task.Id"
+                           class="btn btn-sm btn-primary">Edit</a>
+
+                        <form asp-action="Delete"
+                              asp-route-id="@task.Id"
+                              asp-route-projectId="@projectId"
+                              method="post"
+                              style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit"
+                                    class="btn btn-sm btn-danger"
+                                    onclick="return confirm('Delete this task?')">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+</div>

@@ -1,6 +1,5 @@
 ﻿@model MegaProject.Web.ViewModels.ProjectListViewModel
 @using MegaProject.Web.Extensions
-@using Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     ViewData["Title"] = "Projects";
 }
@@ -101,6 +100,13 @@
                 <td>@(project.DocumentPaths?.Count ?? 0)</td>
 
                 <td>
+                    <a asp-controller="ProjectTask"
+                       asp-action="Index"
+                       asp-route-projectId="@project.Id"
+                       class="btn btn-sm btn-secondary">
+                        Tasks
+                    </a>
+
                     <a asp-action="Details"
                        asp-route-id="@project.Id"
                        class="btn btn-sm btn-info">

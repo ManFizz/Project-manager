@@ -15,7 +15,7 @@ builder.Services.AddControllersWithViews();
 // Business Logic Layer
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
-builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<IProjectTaskService, ProjectTaskService>();
 
 // Data Access Layer
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -45,21 +45,5 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-var opened = false;
-
-_ = Task.Run(async () =>
-{
-    if (opened) return;
-
-    await Task.Delay(1500);
-
-    Process.Start(new ProcessStartInfo
-    {
-        FileName = "http://localhost:5000",
-        UseShellExecute = true
-    });
-
-    opened = true;
-});
 
 app.Run();
