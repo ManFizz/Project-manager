@@ -10,12 +10,15 @@
       <Compile Remove="MegaProject.Domain\**" />
       <Compile Remove="MegaProject.Data\**" />
       <Compile Remove="MegaProject.Services\**" />
+      <Compile Remove="MegaProject.Tests\**" />
       <EmbeddedResource Remove="MegaProject.Domain\**" />
       <EmbeddedResource Remove="MegaProject.Data\**" />
       <EmbeddedResource Remove="MegaProject.Services\**" />
+      <EmbeddedResource Remove="MegaProject.Tests\**" />
       <None Remove="MegaProject.Domain\**" />
       <None Remove="MegaProject.Data\**" />
       <None Remove="MegaProject.Services\**" />
+      <None Remove="MegaProject.Tests\**" />
       <None Remove="MegaProject.db" />
       <None Remove="MegaProject.db-shm" />
       <None Remove="MegaProject.db-wal" />
@@ -122,12 +125,14 @@
       <Content Remove="MegaProject.Data\**" />
       <Content Remove="MegaProject.Domain\**" />
       <Content Remove="MegaProject.Services\**" />
+      <Content Remove="MegaProject.Tests\**" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="MegaProject.Data\MegaProject.Data.csproj" />
       <ProjectReference Include="MegaProject.Domain\MegaProject.Domain.csproj" />
       <ProjectReference Include="MegaProject.Services\MegaProject.Services.csproj" />
+      <ProjectReference Include="MegaProject.Tests\MegaProject.Tests.csproj" />
     </ItemGroup>
 
 </Project>
